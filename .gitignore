@@ -14,4 +14,3 @@
 /support/vscode/node_modules
 /support/vscode/*.log
 /support/vscode/*.vsix
-CMakeLists.txt
