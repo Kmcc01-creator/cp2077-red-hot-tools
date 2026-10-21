@@ -17,6 +17,9 @@ constexpr uint32_t Camera_ProjectPoint = 1517361120;
 constexpr uint32_t CBaseEngine_LoadScripts = 3570081113; // CBaseEngine::LoadScripts
 constexpr uint32_t CBaseEngine_MainLoopTick = 1875906465;
 
+constexpr uint32_t EngineConfig_GetInstance = 3182170505; // from psiberx/cp2077-photomode-ex
+constexpr uint32_t EngineConfigStore_GetVar = 3758823966; // used by Red/EngineConfig.hpp since 6e9a5e2
+
 constexpr uint32_t EntityID_ToStringDEBUG = 3457552837;
 
 constexpr uint32_t FileSystem_Instance = 3788966949;
