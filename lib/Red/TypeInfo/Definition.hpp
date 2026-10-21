@@ -1004,7 +1004,9 @@ struct SystemBuilder
 
         gameInstance->systemMap.Insert(systemType, systemInstance);
         gameInstance->systemImplementations.Insert(systemType, systemType);
-        gameInstance->systemInstances.EmplaceBack(systemInstance);
+        // Named conversion: clang finds the implicit one ambiguous between Handle's const and
+        // non-const conversion operators; MSVC accepts it.
+        gameInstance->systemInstances.EmplaceBack(static_cast<Handle<IScriptable>&>(systemInstance));
     }
 
     static inline Handle<TSystem> BuildSystem()
