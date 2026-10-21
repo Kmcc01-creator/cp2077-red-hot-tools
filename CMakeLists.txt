@@ -10,6 +10,14 @@ cmake_minimum_required(VERSION 3.24)
 project(RedHotTools VERSION 1.3.0 LANGUAGES C CXX RC)
 
 include(FetchContent)
+
+# Builds of the same tree are byte-identical: times that would come from the clock (wil's
+# __DATE__/__TIME__ module stamp, the PE timestamp) come from the commit instead. clang honours
+# SOURCE_DATE_EPOCH for __DATE__ and __TIME__; MSVC ignores it.
+execute_process(COMMAND git log -1 --format=%ct WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+                OUTPUT_VARIABLE commit_time OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_C_COMPILER_LAUNCHER "${CMAKE_COMMAND}" -E env SOURCE_DATE_EPOCH=${commit_time})
+set(CMAKE_CXX_COMPILER_LAUNCHER "${CMAKE_COMMAND}" -E env SOURCE_DATE_EPOCH=${commit_time})
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -118,5 +126,8 @@ target_compile_options(RedHotTools PRIVATE /GR- /EHsc $<$<CONFIG:Release>:/Ob2>)
 # needs the feature enabled. SSE3 dates from 2004, so every CPU that runs the game has it.
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   target_compile_options(RedHotTools PRIVATE -msse3)
+  # The PE timestamp is the commit time instead of the link time, so identical inputs give
+  # identical DLLs. (/Brepro's hash still differed between builds of the same tree.)
+  target_link_options(RedHotTools PRIVATE /timestamp:${commit_time})
 endif()
 target_link_libraries(RedHotTools PRIVATE spdlog hopscotch-map minhook TiltedCore version user32)
