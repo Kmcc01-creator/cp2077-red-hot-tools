@@ -185,8 +185,25 @@ constexpr auto GetDynamicBoundingBox = Core::RawVFunc<
 
 namespace Raw::WorldCollisionNode
 {
-using Actors = Core::OffsetPtr<0x38, Red::Span<Red::CollisionActor>>;
-using Shapes = Core::OffsetPtr<0x48, Red::Span<Red::CollisionShape>>;
+// Game 2.5 keeps a collision node's arrays in compiledData and, when the node loads, sets nine
+// dword byte offsets into it as running sums: actors (0x30 each) at 0x38, always 0, then shapes
+// (0x20 each) at 0x3C, then positions, rotations, scales, materials, presets and shape indices,
+// and the end at 0x58.
+using ActorsOffset = Core::OffsetPtr<0x38, uint32_t>;
+using ShapesOffset = Core::OffsetPtr<0x3C, uint32_t>;
+
+// The node's actor at aIndex, or nullptr where its compiled data does not hold one.
+inline Red::CollisionActor* GetActor(Red::worldCollisionNode* aNode, uint32_t aIndex)
+{
+    const auto& data = aNode->compiledData.buffer;
+    const auto offset = ActorsOffset::Ref(aNode);
+
+    if (!data.data || aIndex >= aNode->numActors ||
+        offset + (aIndex + 1ull) * sizeof(Red::CollisionActor) > data.size)
+        return nullptr;
+
+    return reinterpret_cast<Red::CollisionActor*>(static_cast<uint8_t*>(data.data) + offset) + aIndex;
+}
 }
 
 namespace Raw::WorldInstancedMeshNode

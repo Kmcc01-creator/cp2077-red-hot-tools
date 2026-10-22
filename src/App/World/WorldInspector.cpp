@@ -1408,14 +1408,23 @@ App::PhysicsTraceResultObject App::WorldInspector::GetPhysicsTraceObject(Red::Sc
         if (auto nodeInstance = Red::Cast<Red::worldCollisionNodeInstance>(result.nodeInstance.Lock()))
         {
             auto& nodeDefinition = Raw::WorldCollisionNodeInstance::Node::Ref(nodeInstance);
-            auto& nodeActors = Raw::WorldCollisionNode::Actors::Ref(nodeDefinition);
 
-            result.actorCount = nodeDefinition->numActors;
-            result.shapeCount = nodeActors[result.actorIndex].numShapes;
-
-            if (result.proxyID == Raw::WorldCollisionNodeInstance::SecondaryProxyID::Ref(nodeInstance))
+            // Game 2.5's sectors cook their collision as worldCookedCollisionNode, which is not a
+            // worldCollisionNode: its counts are baked into its own compiledData. Only an
+            // editor-format node, as a mod may add, is read here; a cooked one keeps the proxy's count.
+            if (Red::IsInstanceOf<Red::worldCollisionNode>(nodeDefinition))
             {
-                result.actorOffset = nodeDefinition->numActors / 2;
+                result.actorCount = nodeDefinition->numActors;
+
+                if (auto* actor = Raw::WorldCollisionNode::GetActor(nodeDefinition, result.actorIndex))
+                {
+                    result.shapeCount = actor->numShapes;
+                }
+
+                if (result.proxyID == Raw::WorldCollisionNodeInstance::SecondaryProxyID::Ref(nodeInstance))
+                {
+                    result.actorOffset = nodeDefinition->numActors / 2;
+                }
             }
         }
     }
