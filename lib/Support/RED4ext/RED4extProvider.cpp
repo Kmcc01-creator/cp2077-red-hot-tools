@@ -51,13 +51,21 @@ void Support::RED4extProvider::LogFlush()
 {
 }
 
+// An address that did not resolve is 0 (see ResolveAddress); hooking it fails instead of patching
+// whatever lies at 0.
 bool Support::RED4extProvider::HookAttach(uintptr_t aAddress, void* aCallback)
 {
+    if (!aAddress)
+        return false;
+
     return m_sdk->hooking->Attach(m_plugin, reinterpret_cast<void*>(aAddress), aCallback, nullptr);
 }
 
 bool Support::RED4extProvider::HookAttach(uintptr_t aAddress, void* aCallback, void** aOriginal)
 {
+    if (!aAddress)
+        return false;
+
     return m_sdk->hooking->Attach(m_plugin, reinterpret_cast<void*>(aAddress), aCallback, aOriginal);
 }
 
@@ -66,7 +74,20 @@ bool Support::RED4extProvider::HookDetach(uintptr_t aAddress)
     return m_sdk->hooking->Detach(m_plugin, reinterpret_cast<void*>(aAddress));
 }
 
+// The SDK's resolver shows an error and ends the process on a hash the game's address file lacks,
+// as happens after a game update (five of RedHotTools' own hashes are gone on 2.5). RED4ext's own
+// resolver returns 0 instead; the hook or call that needed the address then fails on its own.
 uintptr_t Support::RED4extProvider::ResolveAddress(uint32_t aAddressID)
 {
-    return RED4ext::UniversalRelocBase::Resolve(aAddressID);
+    using Resolve = uintptr_t (*)(uint32_t);
+    static const auto resolve = reinterpret_cast<Resolve>(
+        GetProcAddress(GetModuleHandleW(L"RED4ext.dll"), "RED4ext_ResolveAddress"));
+
+    const auto address = resolve ? resolve(aAddressID) : 0;
+    if (!address && m_sdk)
+    {
+        m_sdk->logger->ErrorF(m_plugin, "Address %u is not in this game's address file; its feature is off.",
+                              aAddressID);
+    }
+    return address;
 }

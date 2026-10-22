@@ -231,6 +231,13 @@ void App::ArchiveLoader::LoadModArchives(const Red::DynArray<Red::ArchiveGroup*>
         }
     }
 
+    // Its hash is not in game 2.5's address file; without it there is nothing to load with.
+    if (!Raw::ResourceDepot::LoadArchives.GetAddress())
+    {
+        LogError("[ArchiveLoader] The game's archive loader was not found in this build. Aborting.");
+        return;
+    }
+
     Red::ArchiveGroup hotGroup;
     Raw::ResourceDepot::LoadArchives(nullptr, hotGroup, aArchivePaths, aLoadedResources, false);
 
