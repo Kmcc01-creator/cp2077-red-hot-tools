@@ -4,7 +4,8 @@
 
 namespace Raw::inkLayer
 {
-// Not checked on game 2.5: the slot of inkLayer's virtual table that returns its pointer handler.
+// Checked on game 2.5 (verifier run 20261022-093218): slot 0x128 of inkLayer's virtual table reads
+// the layer's window (0x40) and returns the window's pointer handler (0x268).
 constexpr auto GetPointerHandler = Core::RawVFunc<
     /* addr = */ 0x128,
     /* type = */ Red::inkPointerHandler* (Red::inkLayer::*)()>();
