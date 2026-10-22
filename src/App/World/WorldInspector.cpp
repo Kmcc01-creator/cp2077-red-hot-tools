@@ -271,18 +271,18 @@ void App::WorldInspector::UpdateStreamedNodes()
 
                 if (meshResource)
                 {
-                    auto& meshBuffer = meshNode->cookedInstanceTransforms;
-                    auto* meshInstances = std::bit_cast<Red::TransformData*>(&meshBuffer.sharedDataBuffer->buffer);
+                    // Game 2.5 dropped cookedInstanceTransforms (and its worldTransformBuffer type);
+                    // the reflected instanceTransforms array is read instead. Not checked in game yet.
+                    auto& meshInstances = meshNode->instanceTransforms;
 
-                    streamedNode.actors.reserve(meshBuffer.numElements);
+                    streamedNode.actors.reserve(meshInstances.Size());
 
-                    for (auto i = 0; i < meshBuffer.numElements; ++i)
+                    for (const auto& meshInstance : meshInstances)
                     {
-                        auto* meshInstance = meshInstances->Get(meshBuffer.startIndex + i);
                         auto& nodeActor = streamedNode.actors.emplace_back();
 
-                        nodeActor.position = meshInstance->position + nodeTransform.position;
-                        nodeActor.orientation = meshInstance->orientation * nodeTransform.orientation;
+                        nodeActor.position = meshInstance.position + nodeTransform.position;
+                        nodeActor.orientation = meshInstance.orientation * nodeTransform.orientation;
                         nodeActor.boundingBox = meshResource->boundingBox * nodeScale;
 
                         nodeActor.testBox = nodeActor.boundingBox;
