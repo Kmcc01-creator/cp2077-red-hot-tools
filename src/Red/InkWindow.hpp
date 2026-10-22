@@ -4,7 +4,8 @@
 
 namespace Raw::inkWindow
 {
-using PointerHandler = Core::OffsetPtr<0x258, Red::SharedPtr<Red::inkPointerHandler>>;
+// Game 2.5: inkWindow grew by 0x10, and TogglePointerInput sets the handler at 0x268 (0x258 on 2.31).
+using PointerHandler = Core::OffsetPtr<0x268, Red::SharedPtr<Red::inkPointerHandler>>;
 
 constexpr auto Construct = Core::RawFunc<
     /* addr = */ Red::AddressLib::InkWindow_ctor,

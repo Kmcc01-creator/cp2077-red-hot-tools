@@ -25,9 +25,10 @@ struct inkWidgetContext
 
     uint64_t unk00;                    // 00
     inkPointerHandler* pointerHandler; // 08
-    uint8_t unk10[0x70];               // 10
+    uint8_t unk10[0x78];               // 10
 };
-RED4EXT_ASSERT_SIZE(inkWidgetContext, 0x80);
+// Game 2.5: 0x88 bytes; InkWidgetContext_Clone copies through 0x87 (0x80 on 2.31).
+RED4EXT_ASSERT_SIZE(inkWidgetContext, 0x88);
 RED4EXT_ASSERT_OFFSET(inkWidgetContext, pointerHandler, 0x08);
 }
 
