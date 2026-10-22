@@ -83,10 +83,8 @@ void App::WorldNodeRegistry::OnStreamingSectorLoad(Red::worldStreamingSector* aS
         {
             s_knownWorldResources.insert(meshNode->mesh.path);
         }
-        else if (auto instancedMeshNode = Red::Cast<Red::worldInstancedMeshNode>(nodeDefinition))
-        {
-            s_knownWorldResources.insert(instancedMeshNode->mesh.path);
-        }
+        // Game 2.5 bakes an instanced mesh node's mesh into cookedWorldTransformsBuffer, which is not
+        // reflected, so its resource is not known here.
         else if (auto occluderNode = Red::Cast<Red::worldStaticOccluderMeshNode>(nodeDefinition))
         {
             s_knownWorldResources.insert(occluderNode->mesh.path);

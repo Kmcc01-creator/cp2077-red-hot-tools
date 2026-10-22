@@ -145,39 +145,8 @@ void App::WorldInspector::UpdateStreamedNodes()
 
         if (Red::IsInstanceOf<Red::worldInstancedMeshNode>(nodeDefinition))
         {
-            auto& meshResource = Raw::WorldInstancedMeshNodeInstance::Mesh::Ref(nodeInstance);
-
-            if (meshResource)
-            {
-                auto& meshNode = Red::Cast<Red::worldInstancedMeshNode>(nodeDefinition);
-                auto& meshBuffer = meshNode->worldTransformsBuffer;
-                auto* meshInstances = std::bit_cast<Red::RenderProxyTransformData*>(&meshBuffer.sharedDataBuffer->buffer);
-
-                streamedNode.actors.reserve(meshBuffer.numElements);
-
-                for (auto i = 0; i < meshBuffer.numElements; ++i)
-                {
-                    auto* meshInstance = meshInstances->Get(meshBuffer.startIndex + i);
-                    auto& nodeActor = streamedNode.actors.emplace_back();
-
-                    nodeActor.position = meshInstance->transform.Position.AsVector4();
-                    nodeActor.orientation = meshInstance->transform.Orientation;
-                    nodeActor.boundingBox = meshResource->boundingBox;
-
-                    nodeActor.boundingBox *= meshInstance->scale;
-
-                    nodeActor.testBox = nodeActor.boundingBox;
-                    nodeActor.testBox *= nodeActor.orientation;
-                    nodeActor.testBox += nodeActor.position;
-                }
-
-                streamedNode.isTargetable = true;
-            }
-            else
-            {
-                postponedRequests[hash] = request;
-                continue;
-            }
+            // Game 2.5 bakes the mesh and its instances' transforms into cookedWorldTransformsBuffer,
+            // which is not reflected: not targetable until that buffer is read.
         }
         else if (Red::IsInstanceOf<Red::worldInstancedOccluderNode>(nodeDefinition))
         {
