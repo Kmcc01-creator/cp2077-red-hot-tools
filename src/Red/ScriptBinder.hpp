@@ -32,6 +32,10 @@ struct ScriptBinder
     bool CreateFunction(ScriptFunction* aFunc, ScriptReport& aReport);
     void TranslateBytecode(DynArray<ScriptDefinition*>& aDefinitions);
 
+    // Game 2.5: destroys the value holder an RTTI class keeps at 0xE0, if any. The game's binder does it
+    // for every class in the bundle before it creates types, and ClearScriptData does it again.
+    static void ResetClass(CClass* aClass);
+
     CRTTISystem* rtti;
     FileResolver fileResolver;
 };

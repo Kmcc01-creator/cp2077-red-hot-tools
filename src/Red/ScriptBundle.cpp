@@ -83,6 +83,12 @@ Red::DynArray<Red::ScriptDefinition*> Red::ScriptBundle::Collect(bool aDeep) con
         }
     }
 
+    // Game 2.5 binds these too: properties made while reading, for fields a mod adds to a class.
+    for (auto* prop : addedProperties)
+    {
+        definitions.PushBack(prop);
+    }
+
     for (auto* type : types)
     {
         definitions.PushBack(type);

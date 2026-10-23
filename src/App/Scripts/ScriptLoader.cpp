@@ -142,6 +142,30 @@ bool App::ScriptLoader::BindScripts(Red::ScriptBundle& aBundle, Red::ScriptRepor
         return false;
     }
 
+    {
+        // Game 2.5: reset every existing class before any class changes, as the game's binder does. Left to
+        // ClearScriptedData below, one class at a time, the reload crashed destroying a value holder.
+        // A native class is found by its script name, which can differ from its native one.
+        uint32_t resetClasses = 0;
+        uint32_t missingClasses = 0;
+        for (auto* scriptClass : aBundle.classes)
+        {
+            auto* rttiClass = scriptClass->flags.isNative ? rtti->GetClassByScriptName(scriptClass->name)
+                                                          : rtti->GetClass(scriptClass->name);
+            if (!rttiClass)
+            {
+                ++missingClasses;
+            }
+            else if (rttiClass->unkE0)
+            {
+                Red::ScriptBinder::ResetClass(rttiClass);
+                ++resetClasses;
+            }
+        }
+        LogInfo("[ScriptLoader] Reset {} classes' value holders ({} classes not in RTTI yet).", resetClasses,
+                missingClasses);
+    }
+
     for (auto& scriptClass : aBundle.classes)
     {
         if (scriptClass->flags.isNative)

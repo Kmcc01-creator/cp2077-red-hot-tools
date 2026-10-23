@@ -109,6 +109,7 @@ constexpr uint32_t ScriptBinder_CreateEnum = 4171309343;
 constexpr uint32_t ScriptBinder_CreateBitfield = 487007291;
 constexpr uint32_t ScriptBinder_CreateFunction = 777921665;
 constexpr uint32_t ScriptBinder_TranslateBytecode = 3442875632; // CScriptDataBinder::LoadOpcodes
+constexpr uint32_t ScriptBinder_ResetClass = 1057492707; // Game 2.5: destroys the value holder at CClass 0xE0
 
 constexpr uint32_t ScriptBundle_ctor = 3991604425;
 constexpr uint32_t ScriptBundle_dtor = 3993832650;

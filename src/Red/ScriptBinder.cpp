@@ -68,3 +68,10 @@ void Red::ScriptBinder::TranslateBytecode(DynArray<ScriptDefinition*>& aDefiniti
     static UniversalRelocFunc<func_t> func(AddressLib::ScriptBinder_TranslateBytecode);
     func(this, aDefinitions);
 }
+
+void Red::ScriptBinder::ResetClass(CClass* aClass)
+{
+    using func_t = void (*)(CClass*);
+    static UniversalRelocFunc<func_t> func(AddressLib::ScriptBinder_ResetClass);
+    func(aClass);
+}
