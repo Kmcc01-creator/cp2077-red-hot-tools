@@ -22,6 +22,12 @@ bool App::ArchiveLoader::SwapArchives(const std::filesystem::path& aArchiveHotDi
         return false;
     }
 
+    for (const auto& group : archiveGroups)
+    {
+        LogInfo("[ArchiveLoader] Group \"{}\": scope {}, {} archives.", group->basePath.c_str(),
+                static_cast<uint32_t>(group->scope), group->archives.Size());
+    }
+
     if (!ResolveArchivePaths(archiveGroups, aArchiveHotDir, archiveHotPaths, archiveModPaths))
     {
         LogWarning("[ArchiveLoader] No archives found in \"{}\".", aArchiveHotDir.string());
@@ -36,6 +42,10 @@ bool App::ArchiveLoader::SwapArchives(const std::filesystem::path& aArchiveHotDi
         for (const auto& archivePath : archiveHotPaths)
         {
             LogInfo("[ArchiveLoader] - {}", std::filesystem::relative(archivePath.c_str(), aArchiveHotDir).string());
+        }
+        for (const auto& modPath : archiveModPaths)
+        {
+            LogInfo("[ArchiveLoader] - to \"{}\"", modPath.c_str());
         }
 
         Red::DynArray<Red::ResourcePath> hotResources;
@@ -239,7 +249,9 @@ void App::ArchiveLoader::LoadModArchives(const Red::DynArray<Red::ArchiveGroup*>
     }
 
     Red::ArchiveGroup hotGroup;
-    Raw::ResourceDepot::LoadArchives(nullptr, hotGroup, aArchivePaths, aLoadedResources, false);
+    Raw::ResourceDepot::LoadArchives(nullptr, hotGroup, aArchivePaths, aLoadedResources, 0, 0);
+    LogInfo("[ArchiveLoader] Loaded {} archives with {} resources.", hotGroup.archives.Size(),
+            aLoadedResources.Size());
 
     for (const auto& archive : hotGroup.archives)
     {

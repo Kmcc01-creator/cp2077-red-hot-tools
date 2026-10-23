@@ -8,7 +8,12 @@ constexpr auto LoadArchives = Core::RawFunc<
                           Red::ArchiveGroup& aGroup,
                           const Red::DynArray<Red::CString>& aArchivePaths,
                           Red::DynArray<Red::ResourcePath>& aLoadedResourcePaths,
-                          bool aMemoryResident)>{};
+                          uint32_t aMemoryResident,
+                          uint8_t aSource)>{};
+// aMemoryResident is a dword: 2.31's startup loader passes 1 for its "memoryresident_" group.
+// aSource (named here, meaning unknown) is 2 from the startup loader's base groups and 0 from the
+// mod archive loader, in 2.31 and 2.5 alike; the declaration lacked it before, so the byte was
+// whatever lay on the stack.
 
 constexpr auto DestructArchive = Core::RawFunc<
     /* addr = */ Red::AddressLib::ResourceDepot_DestructArchive,
