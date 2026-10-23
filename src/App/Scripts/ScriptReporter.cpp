@@ -2,6 +2,17 @@
 #include "Red/EngineConfig.hpp"
 #include "Red/GameEngine.hpp"
 
+#include <filesystem>
+
+namespace
+{
+// Where RED4ext writes the modded blob: beside the unmodified one, as <name>.redscripts.modded.
+std::filesystem::path ModdedBlobPath(const Red::CString& aBlobPath)
+{
+    return std::filesystem::path(aBlobPath.c_str()).replace_extension("redscripts.modded");
+}
+}
+
 App::ScriptReporter::ScriptReporter(bool aCompatMode)
     : m_compatMode(aCompatMode)
 {
@@ -57,7 +68,10 @@ bool App::ScriptReporter::OnLoadScripts(Red::CBaseEngine& aEngine, Red::CString&
         return false;
 
     const auto compilationEnabled = Red::EngineConfig::Get()->GetValue<bool>("Scripts", "EnableCompilation");
-    if (aEngine.scriptsCompilationErrors.Length() > 0 || (compilationEnabled && aEngine.scriptsBlobPath.Length() == 0))
+    // Game 2.5: RED4ext no longer sets the engine's blob path (it redirects loads of the unmodified blob to the modded
+    // one instead), so an empty path no longer means a failed compilation. It still does where RED4ext sets it.
+    const auto blobPathUnset = aEngine.scriptsBlobPath.Length() == 0 && !std::filesystem::exists(ModdedBlobPath(aPath));
+    if (aEngine.scriptsCompilationErrors.Length() > 0 || (compilationEnabled && blobPathUnset))
     {
         ExitProcess(0xDEAD);
         return false;

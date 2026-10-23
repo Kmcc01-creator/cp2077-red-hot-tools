@@ -75,6 +75,16 @@ bool App::ScriptLoader::CompileScripts(Red::ScriptBundle& aBundle, bool aInjectC
     {
         blobPath = engine->scriptsBlobPath;
     }
+    else
+    {
+        // Game 2.5: RED4ext leaves the engine's blob path unset and writes the modded blob beside the unmodified one.
+        auto moddedBlobPath = m_scriptBlobPath;
+        moddedBlobPath.replace_extension("redscripts.modded");
+        if (std::filesystem::exists(moddedBlobPath))
+        {
+            blobPath = moddedBlobPath.string().c_str();
+        }
+    }
 
     LogInfo(R"([ScriptLoader] Compiling scripts from "{}" as "{}"...)", sourceDir.c_str(), blobPath.c_str());
 
